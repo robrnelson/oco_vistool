@@ -1,0 +1,26 @@
+{
+	"date": "2016-07-27",
+	"geo_upper_left": [43.5, -78.9],
+	"geo_lower_right": [39.6, -77.5],
+	"region": "TestSIF",
+	"oco2_overlay_info": {
+		"file": "/data/OCO2_product/OCO2_L2_Lite_SIF.8r/2016/oco2_LtSIF_160727_B8100r_171010003231s.nc4",
+		"variable": "SIF_757nm",
+		"band_number":"",
+		"variable_plot_lims":[],
+		"lat_name": "latitude",
+		"lon_name": "longitude",
+		"orbit": 11016,
+		"lite_QF": "",
+		"lite_warn_lims": "",
+		"footprint": "", 
+		"cmap": "",
+		"transparency":""
+	},
+	"ground_site": "",
+	"city_labels": "", 
+	"out_plot_dir": "",
+	"out_plot_name": "",
+	"out_data_dir": "",
+	"out_data_name": ""
+}
