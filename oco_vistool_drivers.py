@@ -182,6 +182,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
 
 def sample_geo_run():
 
+    '''
     #Specify the full path to the OCO-3 Lite file
     L2_Lite_file = '/data/oco3/scf/product/Lite_B10400Br_r02/2023/10/01/LtCO2/oco3_LtCO2_231001_B10401Br_231128044453s.nc4'
 
@@ -210,6 +211,38 @@ def sample_geo_run():
         download_dir = download_dir, L2_Lite_file=L2_Lite_file)
     print('Made overlay image    : ' + output_plot_file)
     print('Elapsed time: ' + str(datetime.now()-t0))
+    '''
+
+    #Another Himawari test
+    L2_Lite_file = '/data/oco3/scf/product/Lite_B11072Ar_r02/2022/07/01/LtCO2/oco3_LtCO2_220701_B11072Ar_240915212953s.nc4'
+
+    # info here was manually extracted by looking at:
+    # https://ocov3.jpl.nasa.gov/sams/plots.php?sID=35569
+    obs_datetime = datetime(2022, 7, 1, 0, 7)
+    lat0, lon0 = 37.6,126.9
+    latlon_ul = (lat0 + 1.5, lon0 - 1.5/np.cos(np.deg2rad(lat0)))
+    latlon_lr = (lat0 - 1.5, lon0 + 1.5/np.cos(np.deg2rad(lat0)))
+    orbit = 17871
+    target_id = 'fossil0001'
+    data_rev = 'Lite_B11072Ar_r02' #Adding "Lite_*" because then I can just get data_rev by copying a Lite file's collection label.
+    download_dir = './tmp'
+    out_dir = '/home/rnelson/figures/ACOS/OCO-3/OCO3_TG_AM_plots/'
+
+    t0 = datetime.now()
+    output_plot_file = make_geo_image(
+        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
+        download_dir = download_dir, L2_Lite_file=None)
+    print('Made background image : ' + output_plot_file)
+    print('Elapsed time: ' + str(datetime.now()-t0))
+
+    t0 = datetime.now()
+    output_plot_file = make_geo_image(
+        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
+        download_dir = download_dir, L2_Lite_file=L2_Lite_file)
+    print('Made overlay image    : ' + output_plot_file)
+    print('Elapsed time: ' + str(datetime.now()-t0))
+
+
 
 
 if __name__ == "__main__":
