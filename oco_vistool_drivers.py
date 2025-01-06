@@ -2,6 +2,11 @@
 example driver functions to call vistool from other python code.
 """
 
+import os
+os.environ["OMP_NUM_THREADS"] = "1" 
+os.environ["DASK_NUM_WORKERS"] = "1" 
+os.environ["DASK_ARRAY__CHUNK_SIZE"] = "16MiB" 
+
 from datetime import datetime
 
 import numpy as np
@@ -195,7 +200,7 @@ def sample_geo_run():
     orbit = 24959
     target_id = 'fossil0035'
     data_rev = 'B10401Br_r02'
-    download_dir = './tmp'
+    download_dir = '/scratch-science2/algorithm/rnelson/geostationary/'
     out_dir = './' #Now specifying the output directory
 
     t0 = datetime.now()
@@ -213,6 +218,7 @@ def sample_geo_run():
     print('Elapsed time: ' + str(datetime.now()-t0))
     '''
 
+    '''
     #Another Himawari test
     L2_Lite_file = '/data/oco3/scf/product/Lite_B11072Ar_r02/2022/07/01/LtCO2/oco3_LtCO2_220701_B11072Ar_240915212953s.nc4'
 
@@ -225,7 +231,7 @@ def sample_geo_run():
     orbit = 17871
     target_id = 'fossil0001'
     data_rev = 'Lite_B11072Ar_r02' #Adding "Lite_*" because then I can just get data_rev by copying a Lite file's collection label.
-    download_dir = './tmp'
+    download_dir = '/scratch-science2/algorithm/rnelson/geostationary/'
     out_dir = '/home/rnelson/figures/ACOS/OCO-3/OCO3_TG_AM_plots/'
 
     t0 = datetime.now()
@@ -235,11 +241,37 @@ def sample_geo_run():
     print('Made background image : ' + output_plot_file)
     print('Elapsed time: ' + str(datetime.now()-t0))
 
+    #t0 = datetime.now()
+    #output_plot_file = make_geo_image(
+    #    obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
+    #    download_dir = download_dir, L2_Lite_file=L2_Lite_file)
+    #print('Made overlay image    : ' + output_plot_file)
+    #print('Elapsed time: ' + str(datetime.now()-t0))
+    '''
+
+
+    #Another Himawari test!
+    #L2_Lite_file = '/data/oco3/scf/product/Lite_B11072Ar_r02/2021/04/17/LtCO2/oco3_LtCO2_210417_B11072Ar_240915204218s.nc4'
+    L2_Lite_file = '/data/oco3/scf/product/Lite_B10400Br_r02/2021/04/17/LtCO2/oco3_LtCO2_210417_B10400Br_220318010548s.nc4'
+
+    # info here was manually extracted by looking at:
+    # https://ocov3.jpl.nasa.gov/sams/plots.php?sID=35569
+    obs_datetime = datetime(2021, 4, 17, 21, 55)
+    lat0, lon0 = 38.55,-115.7
+    latlon_ul = (lat0 + 1.5, lon0 - 1.5/np.cos(np.deg2rad(lat0)))
+    latlon_lr = (lat0 - 1.5, lon0 + 1.5/np.cos(np.deg2rad(lat0)))
+    orbit = 11071
+    target_id = 'cal001'
+    data_rev = 'Lite_B10400Br_r02' #Adding "Lite_*" because then I can just get data_rev by copying a Lite file's collection label.
+    #data_rev = 'Lite_B11072Ar_r02' #Adding "Lite_*" because then I can just get data_rev by copying a Lite file's collection label.
+    download_dir = '/scratch-science2/algorithm/rnelson/geostationary/'
+    out_dir = '/home/rnelson/figures/ACOS/OCO-3/OCO3_TG_AM_plots/'
+
     t0 = datetime.now()
     output_plot_file = make_geo_image(
         obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
-        download_dir = download_dir, L2_Lite_file=L2_Lite_file)
-    print('Made overlay image    : ' + output_plot_file)
+        download_dir = download_dir, L2_Lite_file=None)
+    print('Made background image : ' + output_plot_file)
     print('Elapsed time: ' + str(datetime.now()-t0))
 
 
