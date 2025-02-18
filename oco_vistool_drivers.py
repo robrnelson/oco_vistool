@@ -182,7 +182,8 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
         return ''
 
     #Time/creation stamp
-    objs['image_ax'].text(0.99,0.01,"Created "+str(datetime.now().day)+' '+calendar.month_abbr[datetime.now().month]+' '+str(datetime.now().year)+"\nSource: NASA/JPL-Caltech",ha='right', va='bottom', transform=objs['image_ax'].transAxes, color='1.0',size=18)
+    objs['image_ax'].text(0.99,0.01,"Created "+str(datetime.now().day)+' '+calendar.month_abbr[datetime.now().month]+' '+str(datetime.now().year), ha='right', va='bottom', transform=objs['image_ax'].transAxes, color='1.0',size=18)
+    #objs['image_ax'].text(0.99,0.01,"Created "+str(datetime.now().day)+' '+calendar.month_abbr[datetime.now().month]+' '+str(datetime.now().year)+"\nSource: NASA/JPL-Caltech",ha='right', va='bottom', transform=objs['image_ax'].transAxes, color='1.0',size=18)
 
     # could be altered here
     objs['fig'].savefig(out_dir_temp+"/"+output_plot_file) #Give the full path
@@ -191,7 +192,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
     return output_plot_file
 
 
-def sample_geo_run():
+def sample_geos_run():
 
     '''
     #Specify the full path to the OCO-3 Lite file
@@ -284,4 +285,4 @@ def sample_geo_run():
 
 
 if __name__ == "__main__":
-    sample_geo_run()
+    sample_geos_run()
