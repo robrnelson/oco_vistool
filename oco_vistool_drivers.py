@@ -205,7 +205,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
             plt.close(fig)  # 2. Remove the figure from Matplotlib's backend
         del objs            # 3. Delete the local dictionary holding the objects
     
-    gc.collect()            # 4. Force Python to delete the memmap objects and close the files!
+    #gc.collect()            # 4. Force Python to delete the memmap objects and close the files!
     # ------------------------------
 
     return output_plot_file
