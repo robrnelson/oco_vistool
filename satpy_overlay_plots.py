@@ -96,6 +96,9 @@ def _get_AHI_times(file_list):
     scn = Scene(reader = 'ahi_hsd', filenames = file_list)
     time_range = scn.start_time, scn.end_time
 
+    #Test, close scn
+    del scn
+
     return time_range
 
 
@@ -178,6 +181,8 @@ def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, bands_list, 
         g_bucket = s3.Bucket('noaa-goes17')
     elif (platform[-2:] == '18'):
         g_bucket = s3.Bucket('noaa-goes18')
+    elif (platform[-2:] == '19'):
+        g_bucket = s3.Bucket('noaa-goes19')
     else:
         raise ValueError('unknown platform: ', platform)
         
@@ -263,7 +268,8 @@ def get_ABI_files(datetime_utc, center_lat,
     valid_domains = 'C', 'F'
     if domain not in valid_domains:
         raise ValueError('domain must be in '+str(valid_domains))
-    valid_platforms = 'GOES16', 'GOES17', 'GOES18'
+    valid_platforms = 'GOES16', 'GOES17', 'GOES18', 'GOES19'
+    #valid_platforms = 'GOES16', 'GOES17', 'GOES18'
     if platform not in valid_platforms:
         raise ValueError('platform must be in '+str(valid_platforms))
     # code used in filename is G16,G17,G18 for GOES16, GOES17, GOES18
@@ -574,6 +580,9 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     else:
         tmp_scn = scn
 
+    #ROB EDIT: unload scn
+    scn.unload()
+
     #Grab lon_0 and alt from the metadata here. For some reason resampling sets them to 0.
     lon_0_temp = tmp_scn["true_color"].attrs["area"].proj_dict.get('lon_0')
     alt_temp = tmp_scn["true_color"].attrs["area"].proj_dict.get('h')
@@ -584,6 +593,10 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     # optional native resampling.
     method = resample_method.split('_')[-1]
     new_scn = tmp_scn.resample(my_area, resampler=method)
+
+    #ROB EDIT: clean up the intermediate resampled scene ---
+    if resample_method.startswith('native'):
+      tmp_scn.unload()
 
     return new_scn, lon_0_temp, alt_temp
 
@@ -909,8 +922,16 @@ def nonworldview_overlay_plot(
         fig.savefig(out_plot_name)
         print("\nFigure saved at "+ out_plot_name + "\n")
 
+    #ROB EDIT: Explicitly unload the scene and delete it
+    scn.unload()
+    del scn
+
     ax_dict = dict(
         fig = fig, image_ax = ax, cb_ax = cb_ax,
     )
+
+    #ROB EDIT, close the figure. Already saved it if I wanted to.
+    plt.close(fig)
+
 
     return ax_dict

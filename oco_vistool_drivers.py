@@ -17,6 +17,9 @@ from geo_imager_visibility import determine_optimal_geo_satellite
 from oco_vistool import load_OCO2_Lite_overlay_data
 from satpy_overlay_plots import nonworldview_overlay_plot
 
+import gc
+import matplotlib.pyplot as plt
+
 def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
                    orbit, target_id, data_rev, out_dir_temp,
                    download_dir = '.', L2_Lite_file=None):
@@ -86,6 +89,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
         'GOES16_ABI_F':'GOESEastFD', 'GOES16_ABI_C':'GOESEastC',
         'GOES17_ABI_F':'GOESWestFD', 'GOES17_ABI_C':'GOESWestC',
         'GOES18_ABI_F':'GOESWestFD', 'GOES18_ABI_C':'GOESWestC',
+        'GOES19_ABI_F':'GOESEastFD', 'GOES19_ABI_C':'GOESEastC',
         'Himawari-08' : 'Himawari',
         'Himawari-09' : 'Himawari'}
     geo_sensor_prefix = geo_name_mapping[selected_sensor]
@@ -109,13 +113,19 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
 
     # overlay configuration: some changes are possible, to control the way the
     # overlay is drawn on the figure.
+
+    if "FwDaily" in data_rev:
+      var_title_string_temp = 'FwCO2 Bias Corrected and Quality Flagged '+r'$X_{CO_2}$'
+    else:
+      var_title_string_temp = 'Bias Corrected and Quality Flagged '+r'$X_{CO_2}$'
+
     ovr_d = dict(
 
         # important settings, should not be changed
         sensor = 'OCO-3',
         var_file = L2_Lite_file,
         var_name = 'xco2',
-        var_title_string = 'Bias Corrected and Quality Flagged '+r'$X_{CO_2}$',
+        var_title_string = var_title_string_temp, #'Bias Corrected and Quality Flagged '+r'$X_{CO_2}$',
         lat_name = 'vertex_latitude',
         lon_name = 'vertex_longitude',
         lite_quality = 'good',
@@ -185,7 +195,18 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
     objs['image_ax'].text(0.99,0.01,"Created "+str(datetime.now().day)+' '+calendar.month_abbr[datetime.now().month]+' '+str(datetime.now().year), ha='right', va='bottom', transform=objs['image_ax'].transAxes, color='1.0',size=18)
 
     # could be altered here
-    objs['fig'].savefig(out_dir_temp+"/"+output_plot_file) #Give the full path
+    objs['fig'].savefig(out_dir_temp+"/"+output_plot_file,bbox_inches='tight') #Give the full path
+
+    #ROB EDIT, additional attempts to fix memory issues
+    if 'objs' in locals() and objs is not None:
+        fig = objs.get('fig')
+        if fig:
+            fig.clf()       # 1. Clear the figure to break references to the array data
+            plt.close(fig)  # 2. Remove the figure from Matplotlib's backend
+        del objs            # 3. Delete the local dictionary holding the objects
+    
+    gc.collect()            # 4. Force Python to delete the memmap objects and close the files!
+    # ------------------------------
 
     return output_plot_file
 

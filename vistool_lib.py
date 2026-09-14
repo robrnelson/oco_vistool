@@ -189,7 +189,24 @@ def setup_axes(latlon_extent, crs, fignum=1,
     fig = plt.figure(fignum, figsize=figsize)
     fig.clf()
     ax1 = plt.axes(projection=crs)
-    ax1.set_extent([W,E,S,N], ccrs.PlateCarree())
+
+    # Set the map limits directly in projected coordinates rather than via
+    # ax1.set_extent(). set_extent() reprojects the lat/lon box and then clips
+    # it against the axes projection's own domain; when `crs` comes from a
+    # pyresample area whose domain IS this same box (the Geo imager case), that
+    # clip is a numerical knife-edge, and for boxes straddling the equator
+    # (S < 0 < N) it collapses to a zero-width x range. MPL then silently
+    # expands the singular xlim by +/-5%, doubling the x span, which wrecks the
+    # aspect ratio and pushes the colorbar and globe inset off the imagery.
+    # Both projections used here (PlateCarree and epsg:3857) are cylindrical,
+    # so transforming the four corners gives the exact extent.
+    corners = crs.transform_points(
+        ccrs.PlateCarree(), np.array([W, E, E, W]), np.array([S, S, N, N]))
+    if np.all(np.isfinite(corners[:, :2])):
+        ax1.set_xlim(corners[:, 0].min(), corners[:, 0].max())
+        ax1.set_ylim(corners[:, 1].min(), corners[:, 1].max())
+    else:
+        ax1.set_extent([W, E, S, N], ccrs.PlateCarree())
 
     # an attempt to make some of the annotations scale with figure size.
     # figsize 20,20 is the "default", which is what is used for the actual

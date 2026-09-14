@@ -390,6 +390,7 @@ def determine_optimal_geo_satellite(lons, lats, obs_datetime, zenith_limit=None)
         GOES16_ABI_C, GOES16_ABI_F
         GOES17_ABI_C, GOES17_ABI_F
         GOES18_ABI_C, GOES18_ABI_F
+        GOES19_ABI_C, GOES19_ABI_F
 
        If none of the geo satellites can view the requested location,
        None is returned.
@@ -447,11 +448,17 @@ def determine_optimal_geo_satellite(lons, lats, obs_datetime, zenith_limit=None)
         if np.all(checksC):
             sensor_zeniths.append(
                 get_sensor_zenith_bysat(center_lon, center_lat, 'GOESE', mode='C'))
-            visible_sensors.append('GOES16_ABI_C')
+            if obs_datetime < datetime(2025, 4, 1):
+                visible_sensors.append('GOES16_ABI_C')
+            else:
+                visible_sensors.append('GOES19_ABI_C')
         else:
             sensor_zeniths.append(
                 get_sensor_zenith_bysat(center_lon, center_lat, 'GOESE', mode='F'))
-            visible_sensors.append('GOES16_ABI_F')
+            if obs_datetime < datetime(2025, 4, 1):
+                visible_sensors.append('GOES16_ABI_F')
+            else:
+                visible_sensors.append('GOES19_ABI_F')
 
     if len(visible_sensors) > 0:
         min_zenith_idx = np.argmin(sensor_zeniths)

@@ -530,6 +530,7 @@ def process_config_dict(input_dict):
                           'GOES16_ABI_C', 'GOES16_ABI_F',
                           'GOES17_ABI_C', 'GOES17_ABI_F',
                           'GOES18_ABI_C', 'GOES18_ABI_F',
+                          'GOES19_ABI_C', 'GOES19_ABI_F',
                           'Himawari-08', 'Himawari-09')
 
     if cfg_d['sensor'] not in valid_sensor_names:
