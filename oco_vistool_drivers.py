@@ -109,7 +109,13 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
         sensor = selected_sensor,
         files_loc = 'aws',
         data_home = download_dir,
-        resample_method = 'native_bilinear')
+        # 'native_nearest' rather than 'native_bilinear': pyresample's bilinear
+        # resampler dominates the runtime (measured ~78 s vs ~0.3 s for nearest
+        # on a full-disk GOES-16 true_color into a 2000x2000 epsg:3857 box),
+        # cutting the per-plot compute from ~107 s to ~26 s. Since the target
+        # grid (~167 m/px) oversamples the 500 m source, the two only differ
+        # under heavy zoom; at normal viewing size they are indistinguishable.
+        resample_method = 'native_nearest')
 
     # overlay configuration: some changes are possible, to control the way the
     # overlay is drawn on the figure.
@@ -205,7 +211,21 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
             plt.close(fig)  # 2. Remove the figure from Matplotlib's backend
         del objs            # 3. Delete the local dictionary holding the objects
     
-    #gc.collect()            # 4. Force Python to delete the memmap objects and close the files!
+    # 4. Force a full cyclic collection. This IS needed, and it is not about the
+    #    figure: fig.clf() above already drops the imshow'd RGB array by refcount.
+    #    The win is on the satpy side -- satpy.resample.resamplers_cache is a
+    #    WeakValueDictionary, so the resampler objects (which hold the
+    #    precomputed index arrays) are only evicted once the cyclic GC reclaims
+    #    them, and they sit in reference cycles. CPython's automatic GC is
+    #    triggered by object *counts*, not bytes, so a few hundred MB of arrays
+    #    per plot never trips the gen-2 heuristic on its own.
+    #    Measured over 6 real GOES-16 plots (RSS growth per plot):
+    #      native_bilinear: 706 MB/plot without this call, 428 MB/plot with it
+    #      native_nearest:  333 MB/plot without this call, 194 MB/plot with it
+    #    Wall time was identical either way (a full collect costs ~25 ms), so
+    #    this is effectively free. Note it reduces but does not eliminate the
+    #    growth -- very long runs still creep up.
+    gc.collect()
     # ------------------------------
 
     return output_plot_file
